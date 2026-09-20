@@ -7,6 +7,7 @@ import {
   fetchSpeciesByUrl,
   fetchTypeDamageRelations,
 } from "../lib/pokeapi";
+import { fetchTCGCardByPokedexNumber } from "../lib/tcgApi";
 
 export function usePokemonNames() {
   return useQuery({
@@ -70,6 +71,16 @@ export function useTypeDamageRelations(type: string | null) {
     queryFn: () => fetchTypeDamageRelations(type as string),
     enabled: !!type,
     staleTime: Infinity,
+  });
+}
+
+export function useTCGCard(pokedexNumber: number | null) {
+  return useQuery({
+    queryKey: ["tcg-card", pokedexNumber],
+    queryFn: () => fetchTCGCardByPokedexNumber(pokedexNumber as number),
+    enabled: pokedexNumber !== null,
+    staleTime: Infinity,
+    retry: 1,
   });
 }
 
