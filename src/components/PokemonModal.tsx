@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Play, Ruler, Weight, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { usePokemonDetail } from "../hooks/usePokemon";
-import { cryUrlFor, spriteFor } from "../lib/pokeapi";
-import { STAT_LABELS, typeStyle } from "../lib/types";
+import { useAbilityNames, usePokemonDetail, usePokemonSpeciesByUrl } from "../hooks/usePokemon";
+import { cryUrlFor, frenchNameFrom, spriteFor } from "../lib/pokeapi";
+import { STAT_LABELS, typeLabel, typeStyle } from "../lib/types";
 import Pokeball from "./Pokeball";
 
 interface PokemonModalProps {
@@ -13,11 +13,14 @@ interface PokemonModalProps {
 
 export default function PokemonModal({ id, onClose }: PokemonModalProps) {
   const { data: pokemon, isLoading } = usePokemonDetail(id);
+  const { data: species } = usePokemonSpeciesByUrl(pokemon?.species.url);
+  const abilityQueries = useAbilityNames(pokemon?.abilities.map((a) => a.ability.name) ?? []);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
 
   const primaryType = pokemon?.types[0]?.type.name ?? "normal";
   const style = typeStyle(primaryType);
+  const displayName = pokemon ? frenchNameFrom(species, pokemon.name) : "";
 
   function playCry() {
     if (!pokemon) return;
@@ -78,14 +81,14 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
                     transition={{ type: "spring", damping: 14 }}
                     src={spriteFor(pokemon) ?? undefined}
-                    alt={pokemon.name}
+                    alt={displayName}
                     className="h-48 w-48 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"
                   />
                 </div>
 
                 <div className="flex items-center justify-center gap-3">
                   <h2 className="text-center font-display text-3xl font-bold capitalize text-white">
-                    {pokemon.name}
+                    {displayName}
                   </h2>
                   <button
                     onClick={playCry}
@@ -100,9 +103,9 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
                   {pokemon.types.map((t) => (
                     <span
                       key={t.type.name}
-                      className={`rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold tracking-wide text-white capitalize ${typeStyle(t.type.name).gradient}`}
+                      className={`rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold tracking-wide text-white ${typeStyle(t.type.name).gradient}`}
                     >
-                      {t.type.name}
+                      {typeLabel(t.type.name)}
                     </span>
                   ))}
                 </div>
@@ -129,12 +132,12 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
                 <div className="mt-6">
                   <h3 className="mb-3 text-sm font-semibold text-white/60">Capacités</h3>
                   <div className="flex flex-wrap gap-2">
-                    {pokemon.abilities.map((a) => (
+                    {pokemon.abilities.map((a, i) => (
                       <span
                         key={a.ability.name}
                         className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 capitalize"
                       >
-                        {a.ability.name.replace(/-/g, " ")}
+                        {frenchNameFrom(abilityQueries[i]?.data, a.ability.name.replace(/-/g, " "))}
                         {a.is_hidden && <span className="ml-1 text-white/40">(cachée)</span>}
                       </span>
                     ))}

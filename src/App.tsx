@@ -7,8 +7,13 @@ import Pokeball from "./components/Pokeball";
 import PokemonCard from "./components/PokemonCard";
 import PokemonModal from "./components/PokemonModal";
 import TypeFilter from "./components/TypeFilter";
-import { usePokemonDetails, usePokemonNames, useTypeMembers } from "./hooks/usePokemon";
-import { idFromUrl } from "./lib/pokeapi";
+import {
+  usePokemonDetails,
+  usePokemonNames,
+  usePokemonSpeciesByUrls,
+  useTypeMembers,
+} from "./hooks/usePokemon";
+import { frenchNameFrom, idFromUrl } from "./lib/pokeapi";
 
 const PAGE_SIZE = 30;
 
@@ -39,6 +44,9 @@ export default function App() {
 
   const visible = filtered.slice(0, visibleCount);
   const detailQueries = usePokemonDetails(visible.map((v) => v.name));
+  const speciesQueries = usePokemonSpeciesByUrls(
+    detailQueries.map((q) => q.data?.species.url),
+  );
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -85,7 +93,12 @@ export default function App() {
               <AnimatePresence mode="popLayout">
                 {detailQueries.map((q, i) =>
                   q.data ? (
-                    <PokemonCard key={q.data.id} pokemon={q.data} onSelect={setSelectedId} />
+                    <PokemonCard
+                      key={q.data.id}
+                      pokemon={q.data}
+                      displayName={frenchNameFrom(speciesQueries[i]?.data, q.data.name)}
+                      onSelect={setSelectedId}
+                    />
                   ) : (
                     <CardSkeleton key={visible[i]?.name ?? i} />
                   ),

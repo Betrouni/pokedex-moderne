@@ -2,14 +2,15 @@ import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { PokemonDetail } from "../lib/pokeapi";
 import { spriteFor } from "../lib/pokeapi";
-import { typeStyle } from "../lib/types";
+import { typeLabel, typeStyle } from "../lib/types";
 
 interface PokemonCardProps {
   pokemon: PokemonDetail;
+  displayName: string;
   onSelect: (id: number) => void;
 }
 
-export default function PokemonCard({ pokemon, onSelect }: PokemonCardProps) {
+export default function PokemonCard({ pokemon, displayName, onSelect }: PokemonCardProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -66,9 +67,9 @@ export default function PokemonCard({ pokemon, onSelect }: PokemonCardProps) {
           {pokemon.types.map((t) => (
             <span
               key={t.type.name}
-              className={`rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white/90 capitalize ${typeStyle(t.type.name).gradient}`}
+              className={`rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white/90 ${typeStyle(t.type.name).gradient}`}
             >
-              {t.type.name}
+              {typeLabel(t.type.name)}
             </span>
           ))}
         </div>
@@ -78,7 +79,7 @@ export default function PokemonCard({ pokemon, onSelect }: PokemonCardProps) {
         {sprite ? (
           <img
             src={sprite}
-            alt={pokemon.name}
+            alt={displayName}
             loading="lazy"
             className="h-32 w-32 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110"
           />
@@ -88,7 +89,7 @@ export default function PokemonCard({ pokemon, onSelect }: PokemonCardProps) {
       </div>
 
       <p className="relative mt-1 text-center font-display text-lg font-semibold capitalize text-white">
-        {pokemon.name}
+        {displayName}
       </p>
     </motion.button>
   );

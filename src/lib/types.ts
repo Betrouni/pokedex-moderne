@@ -52,6 +52,31 @@ export function typeStyle(type: string): TypeStyle {
   return TYPE_STYLES[type as PokemonType] ?? TYPE_STYLES.normal;
 }
 
+export const TYPE_LABELS_FR: Record<PokemonType, string> = {
+  normal: "Normal",
+  fire: "Feu",
+  water: "Eau",
+  electric: "Électrik",
+  grass: "Plante",
+  ice: "Glace",
+  fighting: "Combat",
+  poison: "Poison",
+  ground: "Sol",
+  flying: "Vol",
+  psychic: "Psy",
+  bug: "Insecte",
+  rock: "Roche",
+  ghost: "Spectre",
+  dragon: "Dragon",
+  dark: "Ténèbres",
+  steel: "Acier",
+  fairy: "Fée",
+};
+
+export function typeLabel(type: string): string {
+  return TYPE_LABELS_FR[type as PokemonType] ?? type;
+}
+
 export const STAT_LABELS: Record<string, string> = {
   hp: "PV",
   attack: "Attaque",

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { POKEMON_TYPES, typeStyle } from "../lib/types";
+import { POKEMON_TYPES, typeLabel, typeStyle } from "../lib/types";
 
 interface TypeFilterProps {
   selected: string | null;
@@ -14,7 +14,7 @@ export default function TypeFilter({ selected, onSelect }: TypeFilterProps) {
         {POKEMON_TYPES.map((type) => (
           <Chip
             key={type}
-            label={type}
+            label={typeLabel(type)}
             active={selected === type}
             color={typeStyle(type).solid}
             onClick={() => onSelect(selected === type ? null : type)}

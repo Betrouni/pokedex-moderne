@@ -21,6 +21,16 @@ export interface PokemonDetail {
   types: { slot: number; type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
   abilities: { ability: { name: string }; is_hidden: boolean }[];
+  species: { name: string; url: string };
+}
+
+export interface LocalizedNames {
+  names: { name: string; language: { name: string } }[];
+}
+
+export function frenchNameFrom(resource: LocalizedNames | undefined, fallback: string): string {
+  const fr = resource?.names.find((n) => n.language.name === "fr");
+  return fr?.name ?? fallback;
 }
 
 export function idFromUrl(url: string): number {
@@ -48,6 +58,18 @@ export async function fetchPokemonNamesByType(type: string): Promise<Set<string>
   if (!res.ok) throw new Error("Impossible de charger ce type");
   const data = await res.json();
   return new Set<string>(data.pokemon.map((p: { pokemon: { name: string } }) => p.pokemon.name));
+}
+
+export async function fetchSpeciesByUrl(url: string): Promise<LocalizedNames> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Impossible de charger les infos du Pokémon");
+  return res.json();
+}
+
+export async function fetchAbility(name: string): Promise<LocalizedNames> {
+  const res = await fetch(`${BASE}/ability/${name}`);
+  if (!res.ok) throw new Error(`Impossible de charger la capacité ${name}`);
+  return res.json();
 }
 
 export function spriteFor(detail: PokemonDetail): string | null {
