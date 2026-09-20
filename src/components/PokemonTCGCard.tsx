@@ -2,7 +2,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import type { PokemonDetail } from "../lib/pokeapi";
 import { spriteFor } from "../lib/pokeapi";
-import { typeLabel, typeStyle } from "../lib/types";
+import { STAT_LABELS, typeLabel, typeStyle } from "../lib/types";
 import Pokeball from "./Pokeball";
 
 interface PokemonTCGCardProps {
@@ -17,26 +17,22 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
 
-  const rotateX = useSpring(useTransform(py, [0, 1], [16, -16]), {
+  const rotateX = useSpring(useTransform(py, [0, 1], [10, -10]), {
     stiffness: 200,
     damping: 22,
   });
-  const rotateY = useSpring(useTransform(px, [0, 1], [-16, 16]), {
+  const rotateY = useSpring(useTransform(px, [0, 1], [-10, 10]), {
     stiffness: 200,
     damping: 22,
   });
 
-  const glareBackground = useTransform([px, py], (latest) => {
-    const [lx, ly] = latest as number[];
-    return `radial-gradient(circle at ${lx * 100}% ${ly * 100}%, rgba(255,255,255,0.65), transparent 42%)`;
-  });
   const holoPosition = useTransform([px, py], (latest) => {
     const [lx, ly] = latest as number[];
     return `${lx * 100}% ${ly * 100}%`;
   });
-  const holoMask = useTransform([px, py], (latest) => {
+  const glareBackground = useTransform([px, py], (latest) => {
     const [lx, ly] = latest as number[];
-    return `radial-gradient(circle at ${lx * 100}% ${ly * 100}%, black, transparent 65%)`;
+    return `radial-gradient(circle at ${lx * 100}% ${ly * 100}%, rgba(255,255,255,0.5), transparent 50%)`;
   });
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -55,6 +51,13 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
   const style = typeStyle(primaryType);
   const artwork = spriteFor(pokemon);
   const hp = pokemon.stats.find((s) => s.stat.name === "hp")?.base_stat ?? "--";
+  const moves = pokemon.stats
+    .filter((s) => s.stat.name !== "hp")
+    .sort((a, b) => b.base_stat - a.base_stat)
+    .slice(0, 2);
+
+  const panelBg = `color-mix(in srgb, ${style.glow} 16%, white)`;
+  const stripBg = `color-mix(in srgb, ${style.glow} 28%, white)`;
 
   return (
     <div className="mx-auto w-full max-w-[280px] select-none">
@@ -72,95 +75,116 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
             style={{ transformStyle: "preserve-3d" }}
             className="relative aspect-[5/7] w-full cursor-pointer"
           >
-            {/* FRONT FACE */}
+            {/* FRONT FACE — styled like a real Pokémon TCG card */}
             <div
-              style={{ backfaceVisibility: "hidden" }}
-              className={`absolute inset-0 overflow-hidden rounded-[20px] bg-gradient-to-br p-[3px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)] ${style.gradient}`}
+              style={{
+                backfaceVisibility: "hidden",
+                background: "linear-gradient(150deg, #f2f2f2, #c7c7cc 35%, #eeeeee 55%, #b9b9c0 80%, #f2f2f2)",
+              }}
+              className="absolute inset-0 overflow-hidden rounded-[16px] p-[7px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
             >
-              <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[17px] bg-[#100f1a]">
-                <div className="flex items-center justify-between px-3.5 pt-3">
-                  <span className="truncate font-display text-sm font-bold text-white capitalize">
+              <div
+                className="relative flex h-full w-full flex-col overflow-hidden rounded-[11px] p-2"
+                style={{ background: panelBg }}
+              >
+                {/* header */}
+                <div className="flex items-center justify-between px-1">
+                  <span className="truncate font-display text-sm font-extrabold text-zinc-800 capitalize">
                     {displayName}
                   </span>
                   <span className="flex items-baseline gap-1 whitespace-nowrap">
-                    <span className="text-[10px] font-bold text-white/70">PV</span>
-                    <span className="text-lg font-bold" style={{ color: style.glow }}>
-                      {hp}
-                    </span>
+                    <span className="text-[10px] font-bold text-zinc-500">PV</span>
+                    <span className="text-lg font-extrabold text-zinc-800">{hp}</span>
+                    <span
+                      className="ml-0.5 h-3.5 w-3.5 rounded-full border border-black/10"
+                      style={{ backgroundColor: style.solid }}
+                    />
                   </span>
                 </div>
 
+                {/* artwork frame */}
                 <div
-                  className="relative mx-3 mt-2 flex flex-1 items-center justify-center overflow-hidden rounded-xl"
-                  style={{
-                    background: `radial-gradient(circle at 50% 35%, ${style.glow}4d, transparent 70%), linear-gradient(160deg, #ffffff12, #ffffff02)`,
-                  }}
+                  className="relative mt-1.5 overflow-hidden rounded-md border-2"
+                  style={{ borderColor: style.solid }}
                 >
                   <div
-                    className="absolute h-24 w-24 rounded-full opacity-60 blur-2xl"
-                    style={{ backgroundColor: style.glow }}
-                  />
-                  {artwork && (
-                    <img
-                      src={artwork}
-                      alt={displayName}
-                      width={200}
-                      height={200}
-                      decoding="async"
-                      style={{ transform: "translateZ(35px)" }}
-                      className="relative h-[85%] w-[85%] object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.6)]"
+                    className="relative flex h-36 items-center justify-center"
+                    style={{
+                      background: `radial-gradient(circle at 50% 35%, color-mix(in srgb, ${style.glow} 55%, white), color-mix(in srgb, ${style.glow} 20%, white) 75%)`,
+                    }}
+                  >
+                    {artwork && (
+                      <img
+                        src={artwork}
+                        alt={displayName}
+                        width={200}
+                        height={200}
+                        decoding="async"
+                        className="relative h-[92%] w-[92%] object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)]"
+                      />
+                    )}
+                    {/* subtle holo sheen — confined to the art window only */}
+                    <motion.div
+                      className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-overlay"
+                      style={{
+                        backgroundImage:
+                          "repeating-linear-gradient(115deg, #ff2ea6 0%, #ff9a2e 12%, #f8ff2e 24%, #35ff7a 36%, #2ee3ff 48%, #7a3bff 60%, #ff2ea6 72%)",
+                        backgroundSize: "220% 220%",
+                        backgroundPosition: holoPosition,
+                      }}
                     />
-                  )}
+                    <motion.div
+                      className="pointer-events-none absolute inset-0"
+                      style={{ background: glareBackground }}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-1.5 py-2.5">
-                  {pokemon.types.map((t) => (
-                    <span
-                      key={t.type.name}
-                      className={`rounded-full bg-gradient-to-r px-2.5 py-0.5 text-[10px] font-semibold text-white ${typeStyle(t.type.name).gradient}`}
-                    >
-                      {typeLabel(t.type.name)}
-                    </span>
+                {/* info strip */}
+                <div
+                  className="mt-1.5 flex items-center justify-between rounded-sm px-2 py-1 text-[9px] font-semibold text-zinc-700"
+                  style={{ background: stripBg }}
+                >
+                  <span>N° {String(pokemon.id).padStart(3, "0")}</span>
+                  <span className="truncate">{typeLabel(primaryType)}</span>
+                  <span>
+                    {pokemon.height / 10} m · {pokemon.weight / 10} kg
+                  </span>
+                </div>
+
+                {/* moves — flavored from the Pokémon's strongest stats */}
+                <div className="mt-2.5 flex flex-col gap-2 px-1">
+                  {moves.map((m) => (
+                    <div key={m.stat.name} className="flex items-center gap-2">
+                      <span
+                        className="h-4 w-4 shrink-0 rounded-full border border-black/10"
+                        style={{ backgroundColor: style.solid }}
+                      />
+                      <span className="flex-1 truncate text-[11px] font-semibold text-zinc-700">
+                        {STAT_LABELS[m.stat.name] ?? m.stat.name}
+                      </span>
+                      <span className="text-sm font-extrabold text-zinc-800">{m.base_stat}</span>
+                    </div>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between px-3.5 pb-2.5 font-mono text-[9px] text-white/35">
-                  <span>N°{String(pokemon.id).padStart(3, "0")}</span>
-                  <span>POKÉDEX</span>
+                {/* footer */}
+                <div className="mt-auto flex items-center justify-between px-1 pt-1 text-[7px] font-medium text-zinc-500/80">
+                  <span>Illus. PokéAPI</span>
+                  <span>POKÉDEX · {String(pokemon.id).padStart(3, "0")}/1302</span>
                 </div>
               </div>
-
-              {/* holographic sheen */}
-              <motion.div
-                className="pointer-events-none absolute inset-0 rounded-[17px] mix-blend-color-dodge"
-                style={{
-                  opacity: 0.8,
-                  backgroundImage:
-                    "repeating-linear-gradient(115deg, #ff2ea6 0%, #ff9a2e 12%, #f8ff2e 24%, #35ff7a 36%, #2ee3ff 48%, #7a3bff 60%, #ff2ea6 72%)",
-                  backgroundSize: "250% 250%",
-                  backgroundPosition: holoPosition,
-                  WebkitMaskImage: holoMask,
-                  maskImage: holoMask,
-                }}
-              />
-              {/* pointer glare */}
-              <motion.div
-                className="pointer-events-none absolute inset-0 rounded-[17px]"
-                style={{ background: glareBackground }}
-              />
-              <div className="pointer-events-none absolute inset-0 rounded-[17px] ring-1 ring-white/15" />
             </div>
 
             {/* BACK FACE */}
             <div
               style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-              className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[20px] border-[3px] border-white/10 bg-gradient-to-br from-[#1b1b2e] to-[#0b0b13] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
+              className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[16px] border-[3px] border-white/10 bg-gradient-to-br from-[#1b1b2e] to-[#0b0b13] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
             >
               <div
                 className="absolute inset-0 opacity-30"
                 style={{
-                  backgroundImage:
-                    "radial-gradient(circle, #ffffff22 1px, transparent 1px)",
+                  backgroundImage: "radial-gradient(circle, #ffffff22 1px, transparent 1px)",
                   backgroundSize: "14px 14px",
                 }}
               />
