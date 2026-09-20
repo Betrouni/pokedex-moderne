@@ -1,5 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Background from "./components/Background";
 import CardSkeleton from "./components/CardSkeleton";
 import Header from "./components/Header";
@@ -27,13 +35,15 @@ export default function App() {
   const { data: allNames, isLoading: namesLoading } = usePokemonNames();
   const { data: typeMembers, isLoading: typeLoading } = useTypeMembers(selectedType);
 
+  const deferredSearch = useDeferredValue(search);
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [search, selectedType]);
+  }, [deferredSearch, selectedType]);
 
   const filtered = useMemo(() => {
     if (!allNames) return [];
-    const term = search.trim().toLowerCase();
+    const term = deferredSearch.trim().toLowerCase();
     return allNames.filter((entry) => {
       const id = idFromUrl(entry.url);
       const matchesSearch =
@@ -41,7 +51,7 @@ export default function App() {
       const matchesType = !selectedType || typeMembers?.has(entry.name);
       return matchesSearch && matchesType;
     });
-  }, [allNames, search, selectedType, typeMembers]);
+  }, [allNames, deferredSearch, selectedType, typeMembers]);
 
   const visible = filtered.slice(0, visibleCount);
   const detailQueries = usePokemonDetails(visible.map((v) => v.name));

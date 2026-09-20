@@ -43,21 +43,20 @@ export default function PokemonCard({ pokemon, displayName, onSelect }: PokemonC
   return (
     <motion.button
       ref={ref}
-      layout
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.35 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={() => onSelect(pokemon.id)}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 800 }}
-      className="glass group relative w-full overflow-hidden rounded-3xl p-5 text-left transition-shadow hover:shadow-2xl"
+      className="card-surface group relative w-full overflow-hidden rounded-3xl p-5 text-left transition-shadow hover:shadow-2xl"
     >
       <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
       <div
-        className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full opacity-30 blur-3xl transition-opacity duration-300 group-hover:opacity-60"
+        className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full opacity-25 blur-2xl transition-opacity duration-300 group-hover:opacity-50"
         style={{ backgroundColor: style.glow }}
       />
 
