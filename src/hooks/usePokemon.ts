@@ -5,6 +5,7 @@ import {
   fetchPokemonDetail,
   fetchPokemonNamesByType,
   fetchSpeciesByUrl,
+  fetchTypeDamageRelations,
 } from "../lib/pokeapi";
 
 export function usePokemonNames() {
@@ -59,6 +60,15 @@ export function usePokemonSpeciesByUrl(url: string | undefined) {
     queryKey: ["species-url", url],
     queryFn: () => fetchSpeciesByUrl(url as string),
     enabled: !!url,
+    staleTime: Infinity,
+  });
+}
+
+export function useTypeDamageRelations(type: string | null) {
+  return useQuery({
+    queryKey: ["type-damage-relations", type],
+    queryFn: () => fetchTypeDamageRelations(type as string),
+    enabled: !!type,
     staleTime: Infinity,
   });
 }

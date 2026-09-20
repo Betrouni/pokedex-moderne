@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
+import { useTypeDamageRelations } from "../hooks/usePokemon";
 import type { PokemonDetail } from "../lib/pokeapi";
 import { spriteFor } from "../lib/pokeapi";
 import { STAT_LABELS, typeLabel, typeStyle } from "../lib/types";
@@ -56,6 +57,10 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
     .sort((a, b) => b.base_stat - a.base_stat)
     .slice(0, 2);
 
+  const { data: relations } = useTypeDamageRelations(primaryType);
+  const weakness = relations?.double_damage_from[0];
+  const resistance = relations?.half_damage_from[0];
+
   const panelBg = `color-mix(in srgb, ${style.glow} 16%, white)`;
   const stripBg = `color-mix(in srgb, ${style.glow} 28%, white)`;
 
@@ -88,8 +93,11 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
                 style={{ background: panelBg }}
               >
                 {/* header */}
-                <div className="flex items-center justify-between px-1">
-                  <span className="truncate font-display text-sm font-extrabold text-zinc-800 capitalize">
+                <div className="flex items-center gap-1.5 px-1">
+                  <span className="shrink-0 rounded-sm bg-zinc-800/10 px-1 py-0.5 text-[7px] font-bold tracking-wide text-zinc-600 uppercase">
+                    Base
+                  </span>
+                  <span className="flex-1 truncate font-display text-sm font-extrabold text-zinc-800 capitalize">
                     {displayName}
                   </span>
                   <span className="flex items-baseline gap-1 whitespace-nowrap">
@@ -153,7 +161,7 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
                 </div>
 
                 {/* moves — flavored from the Pokémon's strongest stats */}
-                <div className="mt-2.5 flex flex-col gap-2 px-1">
+                <div className="mt-2 flex flex-col gap-1.5 px-1">
                   {moves.map((m) => (
                     <div key={m.stat.name} className="flex items-center gap-2">
                       <span
@@ -168,28 +176,102 @@ export default function PokemonTCGCard({ pokemon, displayName }: PokemonTCGCardP
                   ))}
                 </div>
 
-                {/* footer */}
-                <div className="mt-auto flex items-center justify-between px-1 pt-1 text-[7px] font-medium text-zinc-500/80">
+                {/* weakness / resistance — derived from real type damage relations */}
+                <div className="mt-auto grid grid-cols-2 gap-2 border-t border-black/10 px-1 pt-1.5 text-[8px] font-semibold text-zinc-600">
+                  <div className="flex items-center gap-1">
+                    <span className="text-zinc-400">Faiblesse</span>
+                    {weakness ? (
+                      <span className="flex items-center gap-1">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-black/10"
+                          style={{ backgroundColor: typeStyle(weakness.name).solid }}
+                        />
+                        ×2
+                      </span>
+                    ) : (
+                      <span className="text-zinc-300">—</span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-end gap-1">
+                    <span className="text-zinc-400">Résistance</span>
+                    {resistance ? (
+                      <span className="flex items-center gap-1">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-black/10"
+                          style={{ backgroundColor: typeStyle(resistance.name).solid }}
+                        />
+                        ×0.5
+                      </span>
+                    ) : (
+                      <span className="text-zinc-300">—</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-1 flex items-center justify-between px-1 text-[7px] font-medium text-zinc-500/70">
                   <span>Illus. PokéAPI</span>
                   <span>POKÉDEX · {String(pokemon.id).padStart(3, "0")}/1302</span>
                 </div>
               </div>
             </div>
 
-            {/* BACK FACE */}
+            {/* BACK FACE — homage to the classic card back (not an exact copy of the official artwork) */}
             <div
-              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-              className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[16px] border-[3px] border-white/10 bg-gradient-to-br from-[#1b1b2e] to-[#0b0b13] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
+              style={{
+                backfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
+                background: "linear-gradient(155deg, #14226e, #1d3fa8 50%, #14226e)",
+              }}
+              className="absolute inset-0 overflow-hidden rounded-[16px] p-[9px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
             >
-              <div
-                className="absolute inset-0 opacity-30"
-                style={{
-                  backgroundImage: "radial-gradient(circle, #ffffff22 1px, transparent 1px)",
-                  backgroundSize: "14px 14px",
-                }}
-              />
-              <div className="absolute inset-3 rounded-2xl border-2 border-white/15" />
-              <Pokeball size={92} />
+              <div className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[9px] border-2 border-white/25 bg-[#1a30a0] py-4">
+                {/* swirling backdrop */}
+                <motion.div
+                  className="pointer-events-none absolute -inset-1/3 opacity-70"
+                  style={{
+                    background:
+                      "conic-gradient(from 0deg at 50% 50%, transparent 0deg, #ffffff2e 20deg, transparent 55deg, transparent 160deg, #ffffff22 190deg, transparent 230deg, transparent 340deg, #ffffff26 360deg)",
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+                />
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 50%, transparent 28%, rgba(10,18,70,0.55) 100%)",
+                  }}
+                />
+
+                <p
+                  className="relative text-2xl font-black tracking-wide text-[#ffde2e] italic"
+                  style={{
+                    WebkitTextStroke: "1.5px #14226e",
+                    textShadow: "0 2px 0 #0d1a55",
+                  }}
+                >
+                  POKÉDEX
+                </p>
+
+                <div className="relative flex h-24 w-24 items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-white/10 blur-md" />
+                  <Pokeball size={96} />
+                  <div
+                    className="pointer-events-none absolute top-2 left-4 h-6 w-8 rounded-full bg-white/60 opacity-70 blur-[3px]"
+                    style={{ transform: "rotate(-20deg)" }}
+                  />
+                </div>
+
+                <p
+                  className="relative rotate-180 text-2xl font-black tracking-wide text-[#ffde2e] italic"
+                  style={{
+                    WebkitTextStroke: "1.5px #14226e",
+                    textShadow: "0 2px 0 #0d1a55",
+                  }}
+                >
+                  POKÉDEX
+                </p>
+              </div>
             </div>
           </motion.div>
         </motion.div>

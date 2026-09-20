@@ -72,6 +72,18 @@ export async function fetchAbility(name: string): Promise<LocalizedNames> {
   return res.json();
 }
 
+export interface TypeDamageRelations {
+  double_damage_from: { name: string; url: string }[];
+  half_damage_from: { name: string; url: string }[];
+}
+
+export async function fetchTypeDamageRelations(type: string): Promise<TypeDamageRelations> {
+  const res = await fetch(`${BASE}/type/${type}`);
+  if (!res.ok) throw new Error("Impossible de charger ce type");
+  const data = await res.json();
+  return data.damage_relations;
+}
+
 export function spriteFor(detail: PokemonDetail): string | null {
   return (
     detail.sprites.other["official-artwork"].front_default ??
