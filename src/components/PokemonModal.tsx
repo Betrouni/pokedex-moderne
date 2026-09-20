@@ -2,9 +2,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Play, Ruler, Weight, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAbilityNames, usePokemonDetail, usePokemonSpeciesByUrl } from "../hooks/usePokemon";
-import { cryUrlFor, frenchNameFrom, spriteFor } from "../lib/pokeapi";
-import { STAT_LABELS, typeLabel, typeStyle } from "../lib/types";
+import { cryUrlFor, frenchNameFrom } from "../lib/pokeapi";
+import { STAT_LABELS, typeStyle } from "../lib/types";
 import Pokeball from "./Pokeball";
+import PokemonTCGCard from "./PokemonTCGCard";
 
 interface PokemonModalProps {
   id: number | null;
@@ -49,7 +50,7 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
             exit={{ opacity: 0, y: 40, scale: 0.96 }}
             transition={{ type: "spring", damping: 26, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="glass relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl sm:rounded-3xl"
+            className="glass relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl sm:rounded-3xl"
           >
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-56 opacity-40 blur-3xl"
@@ -58,7 +59,7 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2 text-white/70 transition hover:bg-white/20 hover:text-white"
+              className="absolute top-4 right-4 z-10 rounded-full bg-black/40 p-2 text-white/70 backdrop-blur-sm transition hover:bg-black/60 hover:text-white"
               aria-label="Fermer"
             >
               <X className="h-5 w-5" />
@@ -69,78 +70,50 @@ export default function PokemonModal({ id, onClose }: PokemonModalProps) {
                 <Pokeball size={56} />
               </div>
             ) : (
-              <div className="relative p-6 sm:p-8">
-                <span className="font-mono text-sm text-white/40">
-                  #{String(pokemon.id).padStart(3, "0")}
-                </span>
+              <div className="relative flex flex-col items-center p-6 sm:p-8">
+                <PokemonTCGCard pokemon={pokemon} displayName={displayName} />
 
-                <div className="my-2 flex items-center justify-center">
-                  <motion.img
-                    key={pokemon.id}
-                    initial={{ opacity: 0, scale: 0.6, rotate: -8 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", damping: 14 }}
-                    src={spriteFor(pokemon) ?? undefined}
-                    alt={displayName}
-                    className="h-48 w-48 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"
-                  />
-                </div>
+                <button
+                  onClick={playCry}
+                  className={`mt-5 flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-medium text-white transition hover:bg-white/20 ${playing ? "animate-pulse" : ""}`}
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Écouter le cri
+                </button>
 
-                <div className="flex items-center justify-center gap-3">
-                  <h2 className="text-center font-display text-3xl font-bold capitalize text-white">
-                    {displayName}
-                  </h2>
-                  <button
-                    onClick={playCry}
-                    className={`rounded-full border border-white/10 bg-white/10 p-2 text-white transition hover:bg-white/20 ${playing ? "animate-pulse" : ""}`}
-                    aria-label="Écouter le cri"
-                  >
-                    <Play className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div className="mt-3 flex justify-center gap-2">
-                  {pokemon.types.map((t) => (
-                    <span
-                      key={t.type.name}
-                      className={`rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold tracking-wide text-white ${typeStyle(t.type.name).gradient}`}
-                    >
-                      {typeLabel(t.type.name)}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <InfoCard icon={<Ruler className="h-4 w-4" />} label="Taille" value={`${pokemon.height / 10} m`} />
-                  <InfoCard icon={<Weight className="h-4 w-4" />} label="Poids" value={`${pokemon.weight / 10} kg`} />
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="mb-3 text-sm font-semibold text-white/60">Statistiques</h3>
-                  <div className="space-y-3">
-                    {pokemon.stats.map((s) => (
-                      <StatBar
-                        key={s.stat.name}
-                        label={STAT_LABELS[s.stat.name] ?? s.stat.name}
-                        value={s.base_stat}
-                        color={style.solid}
-                      />
-                    ))}
+                <div className="glass mt-6 w-full rounded-2xl p-5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <InfoCard icon={<Ruler className="h-4 w-4" />} label="Taille" value={`${pokemon.height / 10} m`} />
+                    <InfoCard icon={<Weight className="h-4 w-4" />} label="Poids" value={`${pokemon.weight / 10} kg`} />
                   </div>
-                </div>
 
-                <div className="mt-6">
-                  <h3 className="mb-3 text-sm font-semibold text-white/60">Capacités</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {pokemon.abilities.map((a, i) => (
-                      <span
-                        key={a.ability.name}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 capitalize"
-                      >
-                        {frenchNameFrom(abilityQueries[i]?.data, a.ability.name.replace(/-/g, " "))}
-                        {a.is_hidden && <span className="ml-1 text-white/40">(cachée)</span>}
-                      </span>
-                    ))}
+                  <div className="mt-6">
+                    <h3 className="mb-3 text-sm font-semibold text-white/60">Statistiques</h3>
+                    <div className="space-y-3">
+                      {pokemon.stats.map((s) => (
+                        <StatBar
+                          key={s.stat.name}
+                          label={STAT_LABELS[s.stat.name] ?? s.stat.name}
+                          value={s.base_stat}
+                          color={style.solid}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h3 className="mb-3 text-sm font-semibold text-white/60">Capacités</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {pokemon.abilities.map((a, i) => (
+                        <span
+                          key={a.ability.name}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 capitalize"
+                        >
+                          {frenchNameFrom(abilityQueries[i]?.data, a.ability.name.replace(/-/g, " "))}
+                          {a.is_hidden && <span className="ml-1 text-white/40">(cachée)</span>}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

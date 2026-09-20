@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { PokemonDetail } from "../lib/pokeapi";
-import { spriteFor } from "../lib/pokeapi";
+import { thumbnailFor } from "../lib/pokeapi";
 import { typeLabel, typeStyle } from "../lib/types";
 
 interface PokemonCardProps {
@@ -26,7 +26,7 @@ export default function PokemonCard({ pokemon, displayName, onSelect }: PokemonC
 
   const primaryType = pokemon.types[0]?.type.name ?? "normal";
   const style = typeStyle(primaryType);
-  const sprite = spriteFor(pokemon);
+  const sprite = thumbnailFor(pokemon);
 
   function handleMouseMove(e: React.MouseEvent<HTMLButtonElement>) {
     const rect = ref.current?.getBoundingClientRect();
@@ -54,8 +54,10 @@ export default function PokemonCard({ pokemon, displayName, onSelect }: PokemonC
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 800 }}
       className="glass group relative w-full overflow-hidden rounded-3xl p-5 text-left transition-shadow hover:shadow-2xl"
     >
+      <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
       <div
-        className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full opacity-30 blur-3xl transition-opacity duration-300 group-hover:opacity-50"
+        className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full opacity-30 blur-3xl transition-opacity duration-300 group-hover:opacity-60"
         style={{ backgroundColor: style.glow }}
       />
 
@@ -75,13 +77,19 @@ export default function PokemonCard({ pokemon, displayName, onSelect }: PokemonC
         </div>
       </div>
 
-      <div className="relative mx-auto -mt-2 flex h-32 items-center justify-center" style={{ transform: "translateZ(40px)" }}>
+      <div
+        className="relative mx-auto -mt-2 flex h-32 items-center justify-center"
+        style={{ transform: "translateZ(40px)" }}
+      >
         {sprite ? (
           <img
             src={sprite}
             alt={displayName}
+            width={96}
+            height={96}
             loading="lazy"
-            className="h-32 w-32 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110"
+            decoding="async"
+            className="h-32 w-32 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-transform duration-300 [image-rendering:crisp-edges] group-hover:scale-110"
           />
         ) : (
           <div className="h-32 w-32 rounded-full bg-white/5" />

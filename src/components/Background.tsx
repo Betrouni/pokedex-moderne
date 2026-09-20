@@ -27,6 +27,12 @@ export default function Background() {
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
       />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0a0a12_85%)]" />
+      <svg className="absolute inset-0 h-full w-full opacity-[0.035] mix-blend-overlay">
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#grain)" />
+      </svg>
     </div>
   );
 }

@@ -45,8 +45,8 @@ export function usePokemonDetail(idOrName: string | number | null) {
 
 export function usePokemonSpeciesByUrls(urls: (string | undefined)[]) {
   return useQueries({
-    queries: urls.map((url) => ({
-      queryKey: ["species-url", url],
+    queries: urls.map((url, i) => ({
+      queryKey: ["species-url", url ?? `pending-${i}`],
       queryFn: () => fetchSpeciesByUrl(url as string),
       enabled: !!url,
       staleTime: Infinity,

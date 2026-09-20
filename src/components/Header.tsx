@@ -1,5 +1,6 @@
 import { Search, X } from "lucide-react";
 import { motion } from "framer-motion";
+import Pokeball from "./Pokeball";
 
 interface HeaderProps {
   search: string;
@@ -17,11 +18,21 @@ export default function Header({ search, onSearchChange, resultCount }: HeaderPr
           transition={{ duration: 0.5 }}
           className="flex items-center justify-between"
         >
-          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            <span className="bg-gradient-to-r from-fuchsia-400 via-violet-300 to-cyan-300 bg-clip-text text-transparent text-glow">
-              Pokédex
-            </span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <div className="drop-shadow-[0_0_12px_rgba(217,70,239,0.5)]">
+              <Pokeball size={32} />
+            </div>
+            <div>
+              <h1 className="font-display text-3xl leading-none font-bold tracking-tight sm:text-4xl">
+                <span className="bg-gradient-to-r from-fuchsia-400 via-violet-300 to-cyan-300 bg-clip-text text-transparent text-glow">
+                  Pokédex
+                </span>
+              </h1>
+              <p className="mt-1 hidden text-xs text-white/35 sm:block">
+                Explore l'univers Pokémon, un Pokémon à la fois
+              </p>
+            </div>
+          </div>
           <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/50 sm:inline-block">
             {resultCount.toLocaleString("fr-FR")} Pokémon
           </span>

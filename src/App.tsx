@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import Background from "./components/Background";
 import CardSkeleton from "./components/CardSkeleton";
 import Header from "./components/Header";
 import Pokeball from "./components/Pokeball";
 import PokemonCard from "./components/PokemonCard";
-import PokemonModal from "./components/PokemonModal";
 import TypeFilter from "./components/TypeFilter";
+
+const PokemonModal = lazy(() => import("./components/PokemonModal"));
 import {
   usePokemonDetails,
   usePokemonNames,
@@ -114,7 +115,17 @@ export default function App() {
         )}
       </main>
 
-      <PokemonModal id={selectedId} onClose={() => setSelectedId(null)} />
+      <Suspense fallback={selectedId !== null ? <ModalFallback /> : null}>
+        <PokemonModal id={selectedId} onClose={() => setSelectedId(null)} />
+      </Suspense>
+    </div>
+  );
+}
+
+function ModalFallback() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+      <Pokeball size={56} />
     </div>
   );
 }

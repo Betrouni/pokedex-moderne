@@ -80,6 +80,11 @@ export function spriteFor(detail: PokemonDetail): string | null {
   );
 }
 
+/** Small sprite for grid thumbnails — a fraction of the size of the official artwork, used to keep the grid light. */
+export function thumbnailFor(detail: PokemonDetail): string | null {
+  return detail.sprites.front_default ?? spriteFor(detail);
+}
+
 export function cryUrlFor(id: number): string {
   return `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
 }

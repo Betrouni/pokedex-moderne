@@ -38,6 +38,7 @@ function Chip({
 }) {
   return (
     <motion.button
+      whileHover={{ scale: 1.06, y: -1 }}
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium capitalize transition-colors sm:text-sm ${
