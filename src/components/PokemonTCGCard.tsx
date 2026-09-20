@@ -17,6 +17,7 @@ export default function PokemonTCGCard({
 }: PokemonTCGCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
+  const [customBackAvailable, setCustomBackAvailable] = useState(true);
 
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
@@ -266,68 +267,83 @@ export default function PokemonTCGCard({
               )}
             </div>
 
-            {/* BACK FACE — homage to the classic card back (not an exact copy of the official artwork) */}
+            {/* BACK FACE — local custom asset if provided (see public/card-back.webp), homage design otherwise */}
             <div
-              style={{
-                backfaceVisibility: "hidden",
-                transform: "rotateY(180deg)",
-                background:
-                  "linear-gradient(155deg, #14226e, #1d3fa8 50%, #14226e)",
-              }}
-              className="absolute inset-0 overflow-hidden rounded-[16px] p-[9px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
+              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+              className="absolute inset-0 overflow-hidden rounded-[16px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
             >
-              <div className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[9px] border-2 border-white/25 bg-[#1a30a0] py-4">
-                {/* swirling backdrop */}
-                <motion.div
-                  className="pointer-events-none absolute -inset-1/3 opacity-70"
-                  style={{
-                    background:
-                      "conic-gradient(from 0deg at 50% 50%, transparent 0deg, #ffffff2e 20deg, transparent 55deg, transparent 160deg, #ffffff22 190deg, transparent 230deg, transparent 340deg, #ffffff26 360deg)",
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 50,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
+              {customBackAvailable && (
+                <img
+                  src={`${import.meta.env.BASE_URL}card-back.webp`}
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                  onError={() => setCustomBackAvailable(false)}
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
+              )}
+              {!customBackAvailable && (
                 <div
-                  className="pointer-events-none absolute inset-0"
                   style={{
                     background:
-                      "radial-gradient(circle at 50% 50%, transparent 28%, rgba(10,18,70,0.55) 100%)",
+                      "linear-gradient(155deg, #14226e, #1d3fa8 50%, #14226e)",
                   }}
-                />
-
-                <p
-                  className="relative text-2xl font-black tracking-wide text-[#ffde2e] italic"
-                  style={{
-                    WebkitTextStroke: "1.5px #14226e",
-                    textShadow: "0 2px 0 #0d1a55",
-                  }}
+                  className="h-full w-full p-[9px]"
                 >
-                  POKÉDEX
-                </p>
+                  <div className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[9px] border-2 border-white/25 bg-[#1a30a0] py-4">
+                    {/* swirling backdrop */}
+                    <motion.div
+                      className="pointer-events-none absolute -inset-1/3 opacity-70"
+                      style={{
+                        background:
+                          "conic-gradient(from 0deg at 50% 50%, transparent 0deg, #ffffff2e 20deg, transparent 55deg, transparent 160deg, #ffffff22 190deg, transparent 230deg, transparent 340deg, #ffffff26 360deg)",
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 50,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background:
+                          "radial-gradient(circle at 50% 50%, transparent 28%, rgba(10,18,70,0.55) 100%)",
+                      }}
+                    />
 
-                <div className="relative flex h-24 w-24 items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-white/10 blur-md" />
-                  <Pokeball size={96} />
-                  <div
-                    className="pointer-events-none absolute top-2 left-4 h-6 w-8 rounded-full bg-white/60 opacity-70 blur-[3px]"
-                    style={{ transform: "rotate(-20deg)" }}
-                  />
+                    <p
+                      className="relative text-2xl font-black tracking-wide text-[#ffde2e] italic"
+                      style={{
+                        WebkitTextStroke: "1.5px #14226e",
+                        textShadow: "0 2px 0 #0d1a55",
+                      }}
+                    >
+                      POKÉDEX
+                    </p>
+
+                    <div className="relative flex h-24 w-24 items-center justify-center">
+                      <div className="absolute inset-0 rounded-full bg-white/10 blur-md" />
+                      <Pokeball size={96} />
+                      <div
+                        className="pointer-events-none absolute top-2 left-4 h-6 w-8 rounded-full bg-white/60 opacity-70 blur-[3px]"
+                        style={{ transform: "rotate(-20deg)" }}
+                      />
+                    </div>
+
+                    <p
+                      className="relative rotate-180 text-2xl font-black tracking-wide text-[#ffde2e] italic"
+                      style={{
+                        WebkitTextStroke: "1.5px #14226e",
+                        textShadow: "0 2px 0 #0d1a55",
+                      }}
+                    >
+                      POKÉDEX
+                    </p>
+                  </div>
                 </div>
-
-                <p
-                  className="relative rotate-180 text-2xl font-black tracking-wide text-[#ffde2e] italic"
-                  style={{
-                    WebkitTextStroke: "1.5px #14226e",
-                    textShadow: "0 2px 0 #0d1a55",
-                  }}
-                >
-                  POKÉDEX
-                </p>
-              </div>
+              )}
             </div>
           </motion.div>
         </motion.div>
